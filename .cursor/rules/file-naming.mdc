@@ -1,0 +1,31 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# 파일 이름 케밥 케이스 규칙
+
+## 설명
+모든 파일 이름은 케밥 케이스(kebab-case)를 사용해야 합니다.
+
+## 규칙
+- 파일 이름은 소문자로 작성합니다.
+- 단어 사이는 하이픈(-)으로 구분합니다.
+- 숫자는 허용되지만, 파일 이름의 시작은 문자여야 합니다.
+
+## 예시
+✅ 올바른 예시:
+- `user-profile.tsx`
+- `auth-service.ts`
+- `api-endpoints.ts`
+- `utils-helper.ts`
+
+❌ 잘못된 예시:
+- `UserProfile.tsx`
+- `authService.ts`
+- `api_endpoints.ts`
+- `utilsHelper.ts`
+
+## 적용 범위
+- 모든 소스 코드 파일
