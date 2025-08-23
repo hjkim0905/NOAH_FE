@@ -10,6 +10,7 @@ import WeatherInformation from './weather-information';
 import Lottie from 'lottie-react';
 import ReactDOM from 'react-dom/client';
 import { LocationData, MapboxFeature, MapboxGeocodingResponse } from '../types';
+import Image from 'next/image';
 
 export default function MapComponent() {
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -21,6 +22,7 @@ export default function MapComponent() {
         address: '',
     });
     const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
+    const [mapBearing, setMapBearing] = useState(0); // 지도 회전 각도 상태 추가
 
     useEffect(() => {
         // Lottie 애니메이션 데이터 로드
@@ -54,6 +56,18 @@ export default function MapComponent() {
         }
     };
 
+    const handleZoomIn = () => {
+        if (map.current) {
+            map.current.zoomIn();
+        }
+    };
+
+    const handleZoomOut = () => {
+        if (map.current) {
+            map.current.zoomOut();
+        }
+    };
+
     useEffect(() => {
         if (map.current || !animationData) return; // 이미 지도가 초기화되었거나 애니메이션이 로드되지 않았다면 리턴
 
@@ -67,6 +81,14 @@ export default function MapComponent() {
             center: [129.15, 35.85], // 화재발생위치 중심으로 변경
             zoom: 15, // 화재발생위치에 줌인
             attributionControl: false, // 저작권 표시 제거
+        });
+
+        // 지도 회전 이벤트 리스너 추가
+        map.current.on('rotate', () => {
+            if (map.current) {
+                const bearing = map.current.getBearing();
+                setMapBearing(bearing);
+            }
         });
 
         // 지도 로드 완료 후 화재발생위치 마커 추가
@@ -123,6 +145,50 @@ export default function MapComponent() {
                     background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%)',
                 }}
             />
+
+            {/* 줌 컨트롤 버튼들 */}
+            <div className="absolute right-[20px] bottom-[40px] flex flex-col pointer-events-auto">
+                {/* 나침반 컨테이너 */}
+                <div className="w-[57px] h-[137px] mb-[-60px] relative">
+                    <Image
+                        src="/images/CompassBorder.png"
+                        alt="Compass Border"
+                        width={57}
+                        height={137}
+                        className="object-contain"
+                    />
+
+                    {/* 나침반 화살표 - 지도 회전에 따라 회전 */}
+                    <div
+                        className="absolute left-[calc(50%+3px)] top-[calc(50%-30px)] w-[38px] h-[38px]"
+                        style={{ transform: `translate(-50%, -50%) rotate(${-mapBearing}deg)` }}
+                    >
+                        <Image
+                            src="/images/CompassArrow.png"
+                            alt="Compass Arrow"
+                            width={40}
+                            height={40}
+                            className="object-contain"
+                        />
+                    </div>
+                </div>
+
+                {/* 줌 인 버튼 */}
+                <div
+                    onClick={handleZoomIn}
+                    className="w-[57px] h-[57px] cursor-pointer transition-transform duration-300 hover:scale-110"
+                >
+                    <Image src="/images/ZoomIn.png" alt="Zoom In" width={57} height={57} className="object-contain" />
+                </div>
+
+                {/* 줌 아웃 버튼 */}
+                <div
+                    onClick={handleZoomOut}
+                    className="w-[57px] h-[57px] cursor-pointer transition-transform duration-300 hover:scale-110 mt-[-15px]"
+                >
+                    <Image src="/images/ZoomOut.png" alt="Zoom Out" width={57} height={57} className="object-contain" />
+                </div>
+            </div>
 
             {/* 헤더 컴포넌트 */}
             <HeaderComponent
