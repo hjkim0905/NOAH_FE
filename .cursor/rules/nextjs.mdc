@@ -15,3 +15,4 @@ alwaysApply: true
     고려해줘
 -   tailwind의 컬러는 특수한 경우에만 사용해줘
 -   display: flex를 최대한 사용하고 absolute나 relative는 정말 특수한 상황 빼고는 절대 사용금지야
+-   내가 css code를 주더라도 거기에 position : absolute가 있더라도 그저 참고용으로만하고 flex를 최대한 활용해
