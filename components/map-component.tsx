@@ -20,6 +20,7 @@ export default function MapComponent() {
         longitude: 129.15,
         address: '',
     });
+    const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
 
     useEffect(() => {
         // Lottie 애니메이션 데이터 로드
@@ -134,10 +135,10 @@ export default function MapComponent() {
             <HelicopterDeployment />
 
             {/* 소방전략 컴포넌트 */}
-            <FirefightingStrategy />
+            <FirefightingStrategy onExpand={setIsStrategyExpanded} />
 
             {/* 날씨 정보 컴포넌트 */}
-            <WeatherInformation />
+            <WeatherInformation isStrategyExpanded={isStrategyExpanded} />
         </div>
     );
 }
