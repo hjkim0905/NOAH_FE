@@ -20,18 +20,7 @@ export default function Home() {
             style: 'mapbox://styles/mapbox/outdoors-v12', // outdoors 스타일 사용
             center: [129.2, 35.8], // 경주 중심 좌표 [경도, 위도]
             zoom: 12, // 줌 레벨
-            attributionControl: true,
-        });
-
-        // 지도 로드 완료 후 마커 추가
-        map.current.on('load', () => {
-            if (map.current) {
-                // 경주 중심에 마커 추가
-                new mapboxgl.Marker({ color: '#FF6B6B' })
-                    .setLngLat([129.2, 35.8])
-                    .setPopup(new mapboxgl.Popup().setHTML('<h3>경주</h3><p>한국의 고도시</p>'))
-                    .addTo(map.current);
-            }
+            attributionControl: false, // 저작권 표시 제거
         });
 
         // 컴포넌트 언마운트 시 지도 정리
