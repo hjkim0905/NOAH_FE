@@ -214,7 +214,7 @@ export default function MapComponent() {
                 if (!map.current) return;
 
                 const zoom = map.current.getZoom();
-                const minZoomForContours = 14; // 줌 레벨 14 이상에서만 표시
+                const minZoomForContours = 15; // 줌 레벨 14 이상에서만 표시
 
                 if (zoom >= minZoomForContours) {
                     // 등고선 표시
@@ -356,7 +356,7 @@ export default function MapComponent() {
 
                 {/* 드롭다운 메뉴 */}
                 {isDropdownOpen && (
-                    <div className="mt-[8px] w-[207px] h-[255px] bg-[#F8F8F8] rounded-[10px] shadow-[1.625px_3.25px_24.375px_rgba(0,0,0,0.2)] flex flex-col items-center pt-[20px] gap-[6px]">
+                    <div className="mt-[8px] w-[207px] h-[248px] bg-[#F8F8F8] rounded-[10px] shadow-[1.625px_3.25px_24.375px_rgba(0,0,0,0.2)] flex flex-col items-center pt-[6px] gap-[6px] pb-[6px]">
                         {/* SEE ALL 옵션 */}
                         <div
                             className={`w-[188px] h-[54px] flex items-center justify-center rounded-[8px] cursor-pointer transition-all duration-200 ${
