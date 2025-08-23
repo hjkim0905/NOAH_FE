@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import HeaderComponent from './header-component';
+import HelicopterDeployment from './helicopter-deployment';
+import FirefightingStrategy from './firefighting-strategy';
+import WeatherInformation from './weather-information';
 import Lottie from 'lottie-react';
 import ReactDOM from 'react-dom/client';
 import { LocationData, MapboxFeature, MapboxGeocodingResponse } from '../types';
@@ -15,7 +18,7 @@ export default function MapComponent() {
     const [locationData, setLocationData] = useState<LocationData>({
         latitude: 35.85,
         longitude: 129.15,
-        address: 'Loading...',
+        address: '',
     });
 
     useEffect(() => {
@@ -126,6 +129,15 @@ export default function MapComponent() {
                 longitude={locationData.longitude}
                 address={locationData.address}
             />
+
+            {/* 헬기 배치 컴포넌트 */}
+            <HelicopterDeployment />
+
+            {/* 소방전략 컴포넌트 */}
+            <FirefightingStrategy />
+
+            {/* 날씨 정보 컴포넌트 */}
+            <WeatherInformation />
         </div>
     );
 }
