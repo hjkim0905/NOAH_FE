@@ -23,6 +23,8 @@ export default function MapComponent() {
     });
     const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
     const [mapBearing, setMapBearing] = useState(0); // 지도 회전 각도 상태 추가
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // 드롭다운 상태 추가
+    const [selectedOption, setSelectedOption] = useState('SEE ALL'); // 선택된 옵션 상태 추가
 
     useEffect(() => {
         // Lottie 애니메이션 데이터 로드
@@ -66,6 +68,15 @@ export default function MapComponent() {
         if (map.current) {
             map.current.zoomOut();
         }
+    };
+
+    const handleDropdownToggle = () => {
+        setIsDropdownOpen(!isDropdownOpen);
+    };
+
+    const handleOptionSelect = (option: string) => {
+        setSelectedOption(option);
+        setIsDropdownOpen(false);
     };
 
     useEffect(() => {
@@ -196,6 +207,115 @@ export default function MapComponent() {
                 longitude={locationData.longitude}
                 address={locationData.address}
             />
+
+            {/* Firefighter 드롭다운 버튼 */}
+            <div className="absolute top-[118px] right-[20px] flex flex-col items-end">
+                <div
+                    className="w-[177px] h-[66px] bg-white rounded-[10px] shadow-[2px_4px_30px_rgba(0,0,0,0.2)] flex items-center justify-between px-[20px] cursor-pointer"
+                    onClick={handleDropdownToggle}
+                >
+                    <div className="flex items-center">
+                        <div
+                            className="w-[99px] h-[24px] flex items-center text-[20px] font-normal leading-[24px] tracking-[-0.03em] text-black whitespace-nowrap"
+                            style={{ fontFamily: 'Gotham' }}
+                        >
+                            {selectedOption}
+                        </div>
+                    </div>
+
+                    {/* 드롭다운 화살표 */}
+                    <div className="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0 order-1 flex-grow-0">
+                        <Image
+                            src="/images/DropdownArrowDown.png"
+                            alt="Dropdown Arrow"
+                            width={10}
+                            height={10}
+                            className="object-contain"
+                        />
+                    </div>
+                </div>
+
+                {/* 드롭다운 메뉴 */}
+                {isDropdownOpen && (
+                    <div className="mt-[8px] w-[207px] h-[255px] bg-[#F8F8F8] rounded-[10px] shadow-[1.625px_3.25px_24.375px_rgba(0,0,0,0.2)] flex flex-col items-center pt-[20px] gap-[6px]">
+                        {/* SEE ALL 옵션 */}
+                        <div
+                            className={`w-[188px] h-[54px] flex items-center justify-center rounded-[8px] cursor-pointer transition-all duration-200 ${
+                                selectedOption === 'SEE ALL'
+                                    ? 'bg-black text-[#F8F8F8]'
+                                    : 'bg-transparent text-black hover:bg-black hover:text-[#F8F8F8]'
+                            }`}
+                            onClick={() => handleOptionSelect('SEE ALL')}
+                        >
+                            <div
+                                className={`w-[64px] h-[19px] flex items-center justify-center text-[16px] font-normal leading-[19px] tracking-[-0.03em] whitespace-nowrap ${
+                                    selectedOption === 'SEE ALL' ? 'font-medium' : 'font-normal'
+                                }`}
+                                style={{ fontFamily: 'Gotham' }}
+                            >
+                                SEE ALL
+                            </div>
+                        </div>
+
+                        {/* Firefighter 옵션 */}
+                        <div
+                            className={`w-[188px] h-[54px] flex items-center justify-center rounded-[8px] cursor-pointer transition-all duration-200 ${
+                                selectedOption === 'Firefighter'
+                                    ? 'bg-black text-[#F8F8F8]'
+                                    : 'bg-transparent text-black hover:bg-black hover:text-[#F8F8F8]'
+                            }`}
+                            onClick={() => handleOptionSelect('Firefighter')}
+                        >
+                            <div
+                                className={`w-[81px] h-[19px] flex items-center justify-center text-[16px] font-normal leading-[19px] tracking-[-0.03em] whitespace-nowrap ${
+                                    selectedOption === 'Firefighter' ? 'font-medium' : 'font-normal'
+                                }`}
+                                style={{ fontFamily: 'Gotham' }}
+                            >
+                                Firefighter
+                            </div>
+                        </div>
+
+                        {/* Helicopter 옵션 */}
+                        <div
+                            className={`w-[188px] h-[54px] flex items-center justify-center rounded-[8px] cursor-pointer transition-all duration-200 ${
+                                selectedOption === 'Helicopter'
+                                    ? 'bg-black text-[#F8F8F8]'
+                                    : 'bg-transparent text-black hover:bg-black hover:text-[#F8F8F8]'
+                            }`}
+                            onClick={() => handleOptionSelect('Helicopter')}
+                        >
+                            <div
+                                className={`w-[81px] h-[19px] flex items-center justify-center text-[16px] font-normal leading-[19px] tracking-[-0.03em] whitespace-nowrap ${
+                                    selectedOption === 'Helicopter' ? 'font-medium' : 'font-normal'
+                                }`}
+                                style={{ fontFamily: 'Gotham' }}
+                            >
+                                Helicopter
+                            </div>
+                        </div>
+
+                        {/* Fire Engine 옵션 */}
+                        <div
+                            className={`w-[188px] h-[54px] flex items-center justify-center rounded-[8px] cursor-pointer transition-all duration-200 ${
+                                selectedOption === 'Fire Engine'
+                                    ? 'bg-black text-[#F8F8F8]'
+                                    : 'bg-transparent text-black hover:bg-black hover:text-[#F8F8F8]'
+                            }`}
+                            onClick={() => handleOptionSelect('Fire Engine')}
+                        >
+                            <div
+                                className={`w-[81px] h-[19px] flex items-center justify-center text-[16px] font-normal leading-[19px] tracking-[-0.03em] whitespace-nowrap ${
+                                    selectedOption === 'Fire Engine' ? 'font-medium' : 'font-normal'
+                                }`}
+                                style={{ fontFamily: 'Gotham' }}
+                            >
+                                Fire Engine
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* 헬기 배치 컴포넌트 */}
             <HelicopterDeployment />
