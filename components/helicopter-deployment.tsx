@@ -10,7 +10,7 @@ export default function HelicopterDeployment({ isNecessary = true }: HelicopterD
             <div className="flex items-center justify-between h-full px-[20px]">
                 <div className="flex items-center gap-[12px]">
                     <Image
-                        src="/images/helicopterdeployment.png"
+                        src="/images/HelicopterDeployment.png"
                         alt="Helicopter Deployment"
                         width={80}
                         height={80}

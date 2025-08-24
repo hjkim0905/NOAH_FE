@@ -26,7 +26,7 @@ export default function FirefightingStrategy({ onExpand }: FirefightingStrategyP
                 {/* 컨테이너 */}
                 <div className="w-[243px] h-[41px] bg-[#F8F8F8] rounded-[100px] flex items-center pl-[20px] gap-[8px]">
                     <Image
-                        src="/images/strategy.png"
+                        src="/images/Strategy.png"
                         alt="Strategy"
                         width={20}
                         height={14.18}
