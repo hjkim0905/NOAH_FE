@@ -18,3 +18,15 @@ export interface LottieAnimationProps {
     autoplay?: boolean;
     style?: React.CSSProperties;
 }
+
+export interface HelicopterDeploymentProps {
+    isNecessary?: boolean;
+}
+
+export interface WeatherInformationProps {
+    isStrategyExpanded: boolean;
+}
+
+export interface FirefightingStrategyProps {
+    onExpand: (expanded: boolean) => void;
+}

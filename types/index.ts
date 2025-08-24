@@ -32,6 +32,12 @@ export interface FireLocation {
     latitude: number;
 }
 
+export interface LocationData {
+    latitude: number;
+    longitude: number;
+    address: string;
+}
+
 // 컴포넌트 관련 타입
 export * from './component';
 
