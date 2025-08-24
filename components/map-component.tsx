@@ -9,7 +9,21 @@ import FirefightingStrategy from './firefighting-strategy';
 import WeatherInformation from './weather-information';
 import Lottie from 'lottie-react';
 import ReactDOM from 'react-dom/client';
-import { LocationData, MapboxFeature, MapboxGeocodingResponse } from '../types';
+import {
+    LocationData,
+    MapboxFeature,
+    MapboxGeocodingResponse,
+    FireLocation,
+    HeaderComponentProps,
+    MapComponentProps,
+    LottieAnimationProps,
+    HelicopterDeploymentProps,
+    WeatherInformationProps,
+    FirefightingStrategyProps,
+    WeatherData,
+    MapboxTerrainFeature,
+    MapboxTerrainResponse,
+} from '../types';
 import Image from 'next/image';
 
 export default function MapComponent() {
@@ -125,8 +139,8 @@ export default function MapComponent() {
                 if (data.features && data.features.length > 0) {
                     // 모든 등고선의 고도 확인
                     const elevations = data.features
-                        .filter((f: any) => f.properties && f.properties.ele)
-                        .map((f: any) => f.properties.ele);
+                        .filter((f: MapboxTerrainFeature) => f.properties && f.properties.ele)
+                        .map((f: MapboxTerrainFeature) => f.properties.ele);
 
                     console.log('발견된 모든 등고선 고도:', elevations);
 

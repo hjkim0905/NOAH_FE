@@ -13,7 +13,7 @@ export interface MapComponentProps {
 }
 
 export interface LottieAnimationProps {
-    animationData: any;
+    animationData: object;
     loop?: boolean;
     autoplay?: boolean;
     style?: React.CSSProperties;
