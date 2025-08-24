@@ -2,12 +2,14 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { ParsedStrategyData } from '../types';
 
 interface FirefightingStrategyProps {
     onExpand?: (isExpanded: boolean) => void;
+    strategyData: ParsedStrategyData | null;
 }
 
-export default function FirefightingStrategy({ onExpand }: FirefightingStrategyProps) {
+export default function FirefightingStrategy({ onExpand, strategyData }: FirefightingStrategyProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const handleToggle = () => {
@@ -54,38 +56,18 @@ export default function FirefightingStrategy({ onExpand }: FirefightingStrategyP
                         color: isExpanded ? '#000000' : 'transparent',
                     }}
                 >
-                    <p className="text-left">
-                        <span className="font-semibold mb-[8px] block">Helicopter dispatch status: Dispatched</span>
-
-                        <span className="mb-[24px] block">
-                            The fire broke out at a location above the 7th ridge (latitude: 37.123, longitude: 128.456),
-                            making it difficult for people to access, and it was expected that the flames would spread
-                            rapidly, so we decided to dispatch a helicopter.
-                        </span>
-                        <br />
-
-                        <span className="font-semibold mb-[8px] block">
-                            Helicopter Approach Direction: Northeast of the Fire Site
-                        </span>
-
-                        <span className="mb-[24px] block">
-                            The helicopter approached from the northeast of the fire site. Given the current southwest
-                            wind direction, it was judged that the fire would spread northeastward. Additionally, the
-                            helicopter approached from the opposite direction of the smoke movement to ensure the pilots
-                            visibility.
-                        </span>
-
-                        <br />
-
-                        <span className="font-semibold mb-[8px] block">
-                            Fire truck deployment and firefighting departure location
-                        </span>
-
-                        <span>
-                            Since the fire occurred at an elevation of 700 meters or higher, making human access
-                            difficult, fire trucks were deployed near residential areas to protect them.
-                        </span>
-                    </p>
+                    {strategyData ? (
+                        // 파싱된 전략 데이터가 있을 때
+                        <p className="text-left whitespace-pre-line">{strategyData.strategyText}</p>
+                    ) : (
+                        // 기본 텍스트 (데이터가 없을 때)
+                        <p className="text-left">
+                            <span className="font-semibold mb-[8px] block">Loading strategy data...</span>
+                            <span className="mb-[24px] block">
+                                Please wait while we analyze the fire suppression plan...
+                            </span>
+                        </p>
+                    )}
                 </div>
 
                 {/* StrategyArrow 버튼 - 상태에 따라 위치 변경 */}

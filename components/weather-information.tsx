@@ -1,10 +1,32 @@
 import Image from 'next/image';
+import { ParsedWeatherData } from '../types';
 
 interface WeatherInformationProps {
     isStrategyExpanded?: boolean;
+    weatherData: ParsedWeatherData | null;
 }
 
-export default function WeatherInformation({ isStrategyExpanded = false }: WeatherInformationProps) {
+export default function WeatherInformation({ isStrategyExpanded = false, weatherData }: WeatherInformationProps) {
+    // 풍향을 화살표 회전 각도로 변환 (45도씩)
+    const getWindDirectionText = (direction: number) => {
+        if (direction >= 337.5 || direction < 22.5) return 'North wind';
+        if (direction >= 22.5 && direction < 67.5) return 'Northeast wind';
+        if (direction >= 67.5 && direction < 112.5) return 'East wind';
+        if (direction >= 112.5 && direction < 157.5) return 'Southeast wind';
+        if (direction >= 157.5 && direction < 202.5) return 'South wind';
+        if (direction >= 202.5 && direction < 247.5) return 'Southwest wind';
+        if (direction >= 247.5 && direction < 292.5) return 'West wind';
+        if (direction >= 292.5 && direction < 337.5) return 'Northwest wind';
+        return 'Unknown wind';
+    };
+
+    const getArrowRotation = (direction: number) => {
+        // 화살표 이미지가 기본적으로 남서쪽(225도)을 가리키므로, 그에 맞춰 조정
+        const baseRotation = 225; // 남서쪽 기본 방향
+        const targetRotation = direction;
+        return targetRotation - baseRotation;
+    };
+
     return (
         <div
             className={`absolute top-[737px] bg-white rounded-[15px] shadow-[2px_4px_30px_rgba(0,0,0,0.2)] transition-all duration-500 ease-in-out ${
@@ -37,10 +59,17 @@ export default function WeatherInformation({ isStrategyExpanded = false }: Weath
 
                         {/* 풍향 정보 */}
                         <div
-                            className="mt-[30px] ml-[15px] w-[107px] h-[40px] flex items-center text-[14px] font-medium leading-[140%] tracking-[-0.03em] text-white"
+                            className="mt-[30px] ml-[15px] w-[107px] h-[40px] flex flex-col justify-center text-[14px] font-medium leading-[140%] tracking-[-0.03em] text-white"
                             style={{ fontFamily: 'Gotham' }}
                         >
-                            Southwest wind 2-7 m/s
+                            {weatherData ? (
+                                <>
+                                    <div>{getWindDirectionText(weatherData.windDirection)}</div>
+                                    <div>{weatherData.windSpeed} m/s</div>
+                                </>
+                            ) : (
+                                'Loading wind data...'
+                            )}
                         </div>
 
                         {/* 풍속계 이미지 */}
@@ -61,6 +90,11 @@ export default function WeatherInformation({ isStrategyExpanded = false }: Weath
                                     width={80}
                                     height={80}
                                     className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 object-contain"
+                                    style={{
+                                        transform: weatherData
+                                            ? `rotate(${getArrowRotation(weatherData.windDirection)}deg)`
+                                            : 'none',
+                                    }}
                                 />
 
                                 {/* 풍속 숫자 */}
@@ -68,7 +102,7 @@ export default function WeatherInformation({ isStrategyExpanded = false }: Weath
                                     className="absolute w-[10px] h-[14px] left-[calc(50%+2px)] transform -translate-x-1/2 top-[35px] flex items-center justify-center text-[15px] font-normal leading-[14px] text-white text-center"
                                     style={{ fontFamily: 'Gotham' }}
                                 >
-                                    7
+                                    {weatherData ? weatherData.windSpeed : '...'}
                                 </div>
                             </div>
                         </div>
@@ -94,7 +128,7 @@ export default function WeatherInformation({ isStrategyExpanded = false }: Weath
                             className="mt-[26px] w-[70px] h-[49px] flex items-center justify-center text-[35px] font-normal leading-[140%] tracking-[-0.03em] text-[#2D3035] text-center"
                             style={{ fontFamily: 'Gotham' }}
                         >
-                            32%
+                            {weatherData ? (weatherData.humidity !== null ? weatherData.humidity : 32) + '%' : '...'}
                         </div>
                     </div>
                 </div>

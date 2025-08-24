@@ -20,10 +20,13 @@ import {
     HelicopterDeploymentProps,
     WeatherInformationProps,
     FirefightingStrategyProps,
-    WeatherData,
     MapboxTerrainFeature,
     MapboxTerrainResponse,
+    ParsedStrategyData,
+    ParsedWeatherData,
+    EntryPoint,
 } from '../types';
+import { getFireSuppressionData } from '../services/fire-suppression-service';
 import Image from 'next/image';
 
 export default function MapComponent() {
@@ -31,14 +34,182 @@ export default function MapComponent() {
     const map = useRef<mapboxgl.Map | null>(null);
     const [animationData, setAnimationData] = useState(null);
     const [locationData, setLocationData] = useState<LocationData>({
-        latitude: 35.85,
-        longitude: 129.15,
+        latitude: 35.84914551785618,
+        longitude: 129.37443494942733,
         address: '',
     });
-    const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
-    const [mapBearing, setMapBearing] = useState(0);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('SEE ALL');
+    const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
+    const [parsedStrategyData, setParsedStrategyData] = useState<ParsedStrategyData | null>(null);
+    const [parsedWeatherData, setParsedWeatherData] = useState<ParsedWeatherData | null>(null);
+    const [mapBearing, setMapBearing] = useState(0);
+    const [entryPoints, setEntryPoints] = useState<EntryPoint[]>([]);
+
+    // 진입점 마커 추가 함수
+    const addEntryPointMarkers = (strategyData: ParsedStrategyData, option?: string) => {
+        if (!map.current || !strategyData.entryPoints) return;
+
+        // 파라미터로 받은 option이 있으면 사용, 없으면 state의 selectedOption 사용
+        const currentOption = option || selectedOption;
+
+        // 기존 마커 제거
+        removeEntryPointMarkers();
+
+        const newEntryPoints: EntryPoint[] = [];
+        const radius = 0.002; // 약 200m 반경
+
+        strategyData.entryPoints.forEach((entryPointName, index) => {
+            // 진입점 이름에서 방향 추출
+            let direction = '';
+            if (entryPointName.includes('Northeast')) direction = 'Northeast';
+            else if (entryPointName.includes('Northwest')) direction = 'Northwest';
+            else if (entryPointName.includes('Southeast')) direction = 'Southeast';
+            else if (entryPointName.includes('Southwest')) direction = 'Southwest';
+            else if (entryPointName.includes('North')) direction = 'North';
+            else if (entryPointName.includes('South')) direction = 'South';
+            else if (entryPointName.includes('East')) direction = 'East';
+            else if (entryPointName.includes('West')) direction = 'West';
+            else direction = entryPointName.split(' ')[0];
+
+            // 방향에 따른 각도 계산
+            const angle = getDirectionAngle(direction);
+
+            // 발화지점 기준으로 원 위의 좌표 계산
+            const lat = 35.84914551785618;
+            const lon = 129.37443494942733;
+            const markerLat = lat + radius * Math.cos((angle * Math.PI) / 180);
+            const markerLon = lon + radius * Math.sin((angle * Math.PI) / 180);
+
+            // 진입점 방향과 반대 방향의 이미지 사용
+            const oppositeDirection = getOppositeDirection(direction);
+
+            // currentOption 사용 (파라미터로 받은 값 또는 state 값)
+            if (currentOption === 'SEE ALL') {
+                const types: ('firefighter' | 'helicopter' | 'fireengine')[] = [
+                    'firefighter',
+                    'helicopter',
+                    'fireengine',
+                ];
+
+                types.forEach((type, typeIndex) => {
+                    // 헬리콥터가 필요없으면 건너뛰기
+                    if (type === 'helicopter' && !strategyData.helicopterDeployed) {
+                        return;
+                    }
+
+                    // 각 타입별로 약간 다른 위치에 배치
+                    const offset = typeIndex * 0.0003;
+                    const adjustedLat = lat + (radius + offset) * Math.cos((angle * Math.PI) / 180);
+                    const adjustedLon = lon + (radius + offset) * Math.sin((angle * Math.PI) / 180);
+
+                    addMarker(adjustedLon, adjustedLat, type, oppositeDirection, `${entryPointName} (${type})`);
+                });
+            } else {
+                // 개별 타입 선택 시
+                let type: 'firefighter' | 'helicopter' | 'fireengine' = 'firefighter';
+                if (currentOption === 'Helicopter') type = 'helicopter';
+                else if (currentOption === 'Fire Engine') type = 'fireengine';
+
+                // 헬리콥터가 필요없으면 표시하지 않음
+                if (type === 'helicopter' && !strategyData.helicopterDeployed) {
+                    return;
+                }
+
+                addMarker(markerLon, markerLat, type, oppositeDirection, entryPointName);
+            }
+        });
+
+        setEntryPoints(newEntryPoints);
+    };
+
+    // 마커 추가 헬퍼 함수
+    const addMarker = (
+        lon: number,
+        lat: number,
+        type: 'firefighter' | 'helicopter' | 'fireengine',
+        oppositeDirection: string,
+        name: string
+    ) => {
+        if (!map.current) return;
+
+        const markerElement = document.createElement('div');
+        markerElement.className = `entry-point-marker entry-point-${type}`;
+        markerElement.style.width = '60px';
+        markerElement.style.height = '60px';
+        markerElement.style.backgroundImage = `url(/images/${
+            type === 'firefighter' ? 'Firefighter' : type === 'helicopter' ? 'Helicopter' : 'FireEngine'
+        }/${
+            type === 'firefighter' ? 'Firefighter' : type === 'helicopter' ? 'Helicopter' : 'FireEngine'
+        }${oppositeDirection}.png)`;
+        markerElement.style.backgroundSize = 'contain';
+        markerElement.style.backgroundRepeat = 'no-repeat';
+        markerElement.style.cursor = 'pointer';
+
+        new mapboxgl.Marker(markerElement).setLngLat([lon, lat]).addTo(map.current);
+
+        const entryPoint: EntryPoint = {
+            name: name,
+            direction: getDirectionFromAngle(
+                (Math.atan2(lat - 35.84914551785618, lon - 129.37443494942733) * 180) / Math.PI
+            ),
+            type: type,
+        };
+        setEntryPoints((prev) => [...prev, entryPoint]);
+    };
+
+    // 진입점 마커 제거 함수
+    const removeEntryPointMarkers = () => {
+        if (!map.current) return;
+
+        // 모든 마커 제거
+        const markers = document.querySelectorAll('.entry-point-marker');
+        markers.forEach((marker) => marker.remove());
+    };
+
+    // 방향을 각도로 변환하는 함수
+    const getDirectionAngle = (direction: string): number => {
+        const directionMap: { [key: string]: number } = {
+            North: 0,
+            Northeast: 45,
+            East: 90,
+            Southeast: 135,
+            South: 180,
+            Southwest: 225,
+            West: 270,
+            Northwest: 315,
+        };
+        return directionMap[direction] || 0;
+    };
+
+    // 진입점 방향과 반대 방향을 반환하는 함수
+    const getOppositeDirection = (direction: string): string => {
+        const oppositeMap: { [key: string]: string } = {
+            North: 'South',
+            Northeast: 'Southwest',
+            East: 'West',
+            Southeast: 'Northwest',
+            South: 'North',
+            Southwest: 'Northeast',
+            West: 'East',
+            Northwest: 'Southeast',
+        };
+        return oppositeMap[direction] || direction; // 기본값 반환
+    };
+
+    // 각도에서 방향을 반환하는 함수
+    const getDirectionFromAngle = (angle: number): string => {
+        if (angle < 0) angle += 360;
+        if (angle >= 337.5 || angle < 22.5) return 'North';
+        if (angle >= 22.5 && angle < 67.5) return 'Northeast';
+        if (angle >= 67.5 && angle < 112.5) return 'East';
+        if (angle >= 112.5 && angle < 157.5) return 'Southeast';
+        if (angle >= 157.5 && angle < 202.5) return 'South';
+        if (angle >= 202.5 && angle < 247.5) return 'Southwest';
+        if (angle >= 247.5 && angle < 292.5) return 'West';
+        if (angle >= 292.5 && angle < 337.5) return 'Northwest';
+        return 'North';
+    };
 
     useEffect(() => {
         // Lottie 애니메이션 데이터 로드
@@ -90,6 +261,11 @@ export default function MapComponent() {
     const handleOptionSelect = (option: string) => {
         setSelectedOption(option);
         setIsDropdownOpen(false);
+
+        // 선택된 옵션을 직접 파라미터로 전달
+        if (parsedStrategyData) {
+            addEntryPointMarkers(parsedStrategyData, option);
+        }
     };
 
     useEffect(() => {
@@ -239,8 +415,6 @@ export default function MapComponent() {
                     map.current.setLayoutProperty('contours', 'visibility', 'none');
                     map.current.setLayoutProperty('contour-labels', 'visibility', 'none');
                 }
-
-                console.log(`줌 레벨: ${zoom.toFixed(1)}, 등고선: ${zoom >= minZoomForContours ? '표시' : '숨김'}`);
             };
 
             map.current.on('zoom', updateContours);
@@ -266,6 +440,15 @@ export default function MapComponent() {
                 zoom: 15.5,
                 duration: 2000,
             });
+
+            // 백엔드 API에서 화재 진압 계획 가져오기
+            const fireSuppressionData = await getFireSuppressionData(fireLocation[1], fireLocation[0]);
+            if (fireSuppressionData) {
+                setParsedStrategyData(fireSuppressionData.strategyData);
+                setParsedWeatherData(fireSuppressionData.weatherData);
+                // 초기 로드 시에는 현재 selectedOption 상태 사용
+                addEntryPointMarkers(fireSuppressionData.strategyData, selectedOption);
+            }
         });
 
         // 컴포넌트 언마운트 시 지도 정리
@@ -275,6 +458,12 @@ export default function MapComponent() {
             }
         };
     }, [animationData]);
+
+    useEffect(() => {
+        if (parsedStrategyData && map.current) {
+            addEntryPointMarkers(parsedStrategyData, selectedOption);
+        }
+    }, [parsedStrategyData]);
 
     return (
         <div className="min-h-screen relative">
@@ -451,13 +640,13 @@ export default function MapComponent() {
             </div>
 
             {/* 헬기 배치 컴포넌트 */}
-            <HelicopterDeployment />
+            <HelicopterDeployment strategyData={parsedStrategyData} />
 
             {/* 소방전략 컴포넌트 */}
-            <FirefightingStrategy onExpand={setIsStrategyExpanded} />
+            <FirefightingStrategy onExpand={setIsStrategyExpanded} strategyData={parsedStrategyData} />
 
             {/* 날씨 정보 컴포넌트 */}
-            <WeatherInformation isStrategyExpanded={isStrategyExpanded} />
+            <WeatherInformation isStrategyExpanded={isStrategyExpanded} weatherData={parsedWeatherData} />
         </div>
     );
 }

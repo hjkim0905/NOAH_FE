@@ -41,23 +41,6 @@ export interface LocationData {
 // 컴포넌트 관련 타입
 export * from './component';
 
-export interface WeatherData {
-    lon: number;
-    lat: number;
-    WD_FRQ: number; // 풍향 (도)
-    WS_DAVG: number; // 풍속 (m/s)
-    elevation: number; // 고도 (m)
-    RHM_DAVG: number; // 상대습도 (%)
-    TA_DAVG: number; // 기온 (°C)
-    slope: number; // 경사 (도)
-    aspect: number; // 방향 (도)
-}
-
-export interface WeatherAPIResponse {
-    data: WeatherData;
-    instruction: string;
-}
-
 export interface MapboxTerrainFeature {
     type: string;
     geometry: {
@@ -73,4 +56,45 @@ export interface MapboxTerrainFeature {
 
 export interface MapboxTerrainResponse {
     features: MapboxTerrainFeature[];
+}
+
+// 진입점 방향 정보
+export interface EntryPoint {
+    name: string;
+    direction: string; // North, South, East, West, Northeast, Northwest, Southeast, Southwest
+    type: 'firefighter' | 'helicopter' | 'fireengine';
+}
+
+// 백엔드 API 응답 타입
+export interface BackendAPIResponse {
+    output: string;
+}
+
+// Gemini API 응답 타입
+export interface GeminiAPIResponse {
+    candidates: Array<{
+        content: {
+            parts: Array<{
+                text: string;
+            }>;
+        };
+    }>;
+}
+
+// 파싱된 전략 데이터 타입
+export interface ParsedStrategyData {
+    helicopterDeployed: boolean;
+    slope: number;
+    elevation: number;
+    windSpeed: number;
+    windDirection: number;
+    entryPoints: string[];
+    strategyText: string;
+}
+
+// 파싱된 날씨 데이터 타입
+export interface ParsedWeatherData {
+    windDirection: number;
+    windSpeed: number;
+    humidity: number;
 }
